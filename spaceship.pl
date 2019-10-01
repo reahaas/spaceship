@@ -78,18 +78,22 @@ ship_fire_shot(Player, Ship, Shot):-
 	get_shot_initial_location(Player, Ship, Loaction),
 	Shot = [Direction, Loaction].
 
+reduce_one_action_point(Action_points, Action_points1):-
+    Action_points > 0,  % make sure there that the player has an action point.
+	Action_points1 is Action_points - 1.
+
 create_shot(Fleet, Fleet1, Shot):-
     Fleet = [Player, Action_points, Ships],  % decode fleet
 	
-	Action_points > 0,  % make sure there that the player has an action point.
-	Action_points1 is Action_points - 1,
+	reduce_one_action_point(Action_points, Action_points1),
 	Fleet1 = [Player, Action_points1, Ships],
 	
 	member(Ship, Ships),
 	ship_fire_shot(Player, Ship, Shot).
 
 
-action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits),pos(Turn, Ender_fleet1, Bugs_fleet1, Shots1, Hits)):-
+action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits),
+            pos(Turn, Ender_fleet1, Bugs_fleet1, Shots1, Hits)):-
     (
 	 ( Turn = ender,
 	   create_shot(Ender_fleet, Ender_fleet1, Shot),
@@ -103,11 +107,50 @@ action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits),pos(Turn, Ender_flee
 	Shots1 = [Shot|Shots].
 	%%% note: maybe need to sort the shots to avoid duplication positions.
 	
+in_the_board(X1):-
+    X1 >= 1,
+	board_size(N),
+	X1 =< N.
 	
-action_push_spaceship(Pos,Pos1):-
-    %%% need to fill up.
-	aaa.
+push_spaceship(Fleet, Fleet1):-
+    % decode fleet.
+	Fleet = [Player, Action_points, Ships],  
+	
+	% update action points.
+	reduce_one_action_point(Action_points, Action_points1), 
+	
+	% choose a single ship to move.
+	select(Ship, Ships, Ships_temp),
+	
+	% update the location.
+	Ship = [HP, [X,Y]],
+	( X1 is X + 1;
+	  X1 is X - 1
+	),
+	in_the_board(X1),
+	Ship1 = [HP, [X1,Y]],
+	
+	% add the pushed ship back to the Ships list.
+    select(Ship1, Ships1, Ships_temp),	
+	
+	Fleet1 = [Player, Action_points1, Ships1].
+	
 
+% action_push_spaceship(+Pos,-Pos1)
+% push one of the player ships one squre.
+action_push_spaceship(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits),
+                      pos(Turn, Ender_fleet1, Bugs_fleet1, Shots, Hits)):-
+    (
+	 ( Turn = ender,
+	   push_spaceship(Ender_fleet, Ender_fleet1),
+       Bugs_fleet1 = Bugs_fleet
+     );
+	 ( Turn = bugs,
+	   push_spaceship(Bugs_fleet, Bugs_fleet1),
+	   Ender_fleet1 = Ender_fleet
+	 )
+	).
+	
 
 change_player(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits), 
               pos(Turn1, Ender_fleet, Bugs_fleet, Shots, Hits)):-         
@@ -137,10 +180,11 @@ calculate_shots_flight([Shot|Shots_res],[Shot1|Shots_res1]):-
     calculate_shot_filght(Shot,Shot1),
 	calculate_shots_flight(Shots_res,Shots_res1).
 
-% update_hps(+Shots1, +Fleet,-Fleet1)
-update_hps(Shots, [ender, Action_points, [Ship|Fleet_res] ], [Ship1|Fleet_res1]):-
-    Ship = [HP, Column],
-	colusions().
+% update_hps(+Shots1, +Fleet, -Fleet1)
+update_hps(Shots1, Fleet, Fleet):- 
+% update_hps(Shots, [ender, Action_points, [Ship|Fleet_res] ], [Ship1|Fleet_res1]):-  % 
+    Ship = [HP, Column].  %,
+	%colusions().
         
 
 post_turn_actoin(pos(Turn, Ender_fleet, Bugs_fleet, Shots, GUI), 
@@ -167,8 +211,8 @@ move_use_2_action_point(Pos,Pos2):-
 * HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,6]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[],_),move_use_1_action_point(Pos,Pos1).
 */
 move_use_1_action_point(Pos,Pos1):-
-	action_shot(Pos,Pos1).  %;
-	% action_push_spaceship(Pos,Pos1).
+	action_shot(Pos,Pos1);
+	action_push_spaceship(Pos,Pos1).
 
 
 % no moves can be perform.
@@ -181,8 +225,8 @@ move(Pos,_):-
 move(Pos,Pos3):-
     (
 	move_use_1_action_point(Pos,Pos1);
-	move_use_2_action_point(Pos,Pos1);
-	move_use_3_action_point(Pos,Pos1)
+	move_use_2_action_point(Pos,Pos1)  %;
+	% move_use_3_action_point(Pos,Pos1)
 	),
 	change_player(Pos1,Pos2),
 	post_turn_actoin(Pos2,Pos3).
