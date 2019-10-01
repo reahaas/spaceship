@@ -37,6 +37,7 @@ initialize_game(Game):-
 */
 	
 
+
 % game flow:
 
 
@@ -177,23 +178,90 @@ calculate_shot_filght([[Xd,Yd],[Xl,Yl]],Shot1):-
 calculate_shots_flight([],[]).
 
 calculate_shots_flight([Shot|Shots_res],[Shot1|Shots_res1]):-
-    calculate_shot_filght(Shot,Shot1),
+	calculate_shot_filght(Shot,Shot1),
 	calculate_shots_flight(Shots_res,Shots_res1).
 
-% update_hps(+Shots1, +Fleet, -Fleet1)
-update_hps(Shots1, Fleet, Fleet):- 
-% update_hps(Shots, [ender, Action_points, [Ship|Fleet_res] ], [Ship1|Fleet_res1]):-  % 
-    Ship = [HP, Column].  %,
-	%colusions().
-        
 
+% remove all the shots that exceded the borders of the board.
+% clean_out_of_board_shots(+Shots, -Shots1).
+clean_out_of_board_shots([],[]).
+clean_out_of_board_shots([Shot|Shots_res], Shots_res):-
+	Shot = [Direction, [X,Y]],
+	board_size(N),
+	( Y =< 1 ; Y >= N ), !.
+	
+clean_out_of_board_shots([Shot|Shots_res], [Shot|Shots_res1]):-
+	clean_out_of_board_shots(Shots_res, Shots_res1).
+
+/*
+% remove all the shots that colusions with one another.
+% clean_colusion_shots(+Shots1, -Shots2).
+clean_colusion_shots([],[]).
+clean_colusion_shots(Shots1, Shots2):-
+*/
+
+
+% clean_shots(+Shots, -Shots1).
+clean_shots([],[]).
+clean_shots(Shots, Shots1):-
+    clean_out_of_board_shots(Shots, Shots1).
+	% clean_colusion_shots(Shots1, Shots2).
+	
+    
+
+
+
+% count_hits(+Loaction, +Shots, -Count)
+count_hits(Loaction, [], 0 ).
+count_hits(Loaction, [Shot|Shots_res], Count):-
+    Shot = [Direction, Loaction], !,  % Shot hit the Location.
+	count_hits(Loaction, Shots_res, Count1),
+	Count is Count1 + 1 .
+
+count_hits(Loaction, [Shot|Shots_res], Count):-  % shot didnt hit Location.
+    count_hits(Loaction, Shots_res, Count).
+
+% update_hps(+Shots1, +Ships, -Ships1)
+update_hps(Shots, [], []):- 
+    !.  
+
+update_hps(Shots, [Ship|Ships_res], Ships1):-  
+    Ship = [HP, Loaction],
+	count_hits(Loaction, Shots, Count),
+	HP1 is HP - Count,
+	update_hps(Shots, Ships_res, Ships_res1),  
+    (
+	 % a ship reach zero HP, which means it destroyed.
+	 ( HP1 =< 0, !,
+	   Ships1 = Ships_res1
+	 );
+	 (
+	   Ship1 = [HP1, Loaction], 
+	   Ships1 = [Ship1|Ships_res1]	 
+	 )
+	).
+
+
+/* test:
+Pos2 = pos(bugs, [ender, 0, [[1, [1, 1]]]], [bugs, 2, [[1, [1, 6]]]], [], _4072), post_turn_actoin(Pos2,Pos3).
+*/
+% post_turn_actoin(+Pos,-Pos1)
 post_turn_actoin(pos(Turn, Ender_fleet, Bugs_fleet, Shots, GUI), 
-                 pos(Turn1, Ender_fleet, Bugs_fleet, Shots1, GUI1)):-
-    calculate_shots_flight(Shots,Shots1),
-	update_hps(Shots1, Ender_fleet, Ender_fleet1),
-	update_hps(Shots1, Bugs_fleet, Bugs_fleet1).
+                 pos(Turn, Ender_fleet1, Bugs_fleet1, Shots2, GUI)):-
+	calculate_shots_flight(Shots,Shots1),
+	
+	% gui object need to be before the update_hps, to have also destroyed spaceships.
 	% build_gui_objects(pos(Turn1, Ender_fleet, Bugs_fleet, Shots1, GUI1)),
-	% clean_shots(Shots1,Shots2).
+	
+	Ender_fleet = [ender, Action_points_ender, Ender_ships],
+	update_hps(Shots1, Ender_ships, Ender_ships1),
+	Ender_fleet1 = [ender, Action_points_ender, Ender_ships1],
+	
+	Bugs_fleet = [bugs, Action_points_bugs, Bugs_ships],
+	update_hps(Shots1, Bugs_ships, Bugs_ships1),
+	Bugs_fleet1 = [bugs, Action_points_bugs, Bugs_ships1],
+	
+	clean_shots(Shots1,Shots2).
 
 
 % A move is done by using action points: to fire or move your own ships.
@@ -221,6 +289,9 @@ move(Pos,_):-
 
 % General movet hat can be done.
 % at each turn, the player can use 1-3 action point.
+/* test:
+HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,6]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[],_),move(Pos,Pos1).
+*/
 % move(+Pos,-Pos3)
 move(Pos,Pos3):-
     (
