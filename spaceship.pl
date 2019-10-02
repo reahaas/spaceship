@@ -17,19 +17,29 @@ new impleamentation:
 */
 
 % Todo: put this in the initialization of the game.
-board_size(6).  %:-
+board_size(12).  %:-
     % integer(N).
 	
 % game representation:
-pos(Turn, Ender_fleet, Bugs_fleet, Shots, Gui_objects):-
+pos(Turn, Ender_fleet, Bugs_fleet, Shots):-  %%%  , Gui_objects):-
+	
+	% Turn is the name of the player. 
+	% it can be one of: {ender, bugs}.
+	
+	% Fleets look like this:
+	Ender_fleet = [ender, Ender_action_points, Ender_ships],
+	Bugs_fleet = [bugs, Bugs_action_points, Bugs_ships].
 	
 	% each X_ships is an array of ship object, which is a list of two arguments:
     % ship = [HP, [X,Y]].	
-	
-	Ender_fleet = [ender, Ender_action_points, Ender_ships],
-	Bugs_fleet = [bugs, Bugs_action_points, Bugs_ships].
-	% colusions(Shots, Gui_objects).
-	
+
+    % Shots is an array of Shot objects:
+	% Shot = [Direction, Location] , 
+	% Direction = [Xd,Yd], Location = [Xl,Yl].
+
+    % Gui_objects is the full board representation.
+	% it's calculate by the lists: Ender_fleet, Bugs_fleet, Shots.
+
 /*	
 initialize_game(Game):-
     initialize_board(Game,Board),
@@ -43,7 +53,7 @@ initialize_game(Game):-
 
 % the game is over when one of the fleet have no more ships. 
 % game_over(+Pos).
-game_over(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits)):-
+game_over(pos(Turn, Ender_fleet, Bugs_fleet, Shots)):-
     ( Ender_fleet = [ender, Action_points, Ships]; 
 	  Bugs_fleet = [bugs, Action_points, Ships]
 	),
@@ -93,8 +103,8 @@ create_shot(Fleet, Fleet1, Shot):-
 	ship_fire_shot(Player, Ship, Shot).
 
 
-action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits),
-            pos(Turn, Ender_fleet1, Bugs_fleet1, Shots1, Hits)):-
+action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
+            pos(Turn, Ender_fleet1, Bugs_fleet1, Shots1)):-
     (
 	 ( Turn = ender,
 	   create_shot(Ender_fleet, Ender_fleet1, Shot),
@@ -138,9 +148,9 @@ push_spaceship(Fleet, Fleet1):-
 	
 
 % action_push_spaceship(+Pos,-Pos1)
-% push one of the player ships one squre.
-action_push_spaceship(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits),
-                      pos(Turn, Ender_fleet1, Bugs_fleet1, Shots, Hits)):-
+% push one of the player ships one square.
+action_push_spaceship(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
+                      pos(Turn, Ender_fleet1, Bugs_fleet1, Shots)):-
     (
 	 ( Turn = ender,
 	   push_spaceship(Ender_fleet, Ender_fleet1),
@@ -153,8 +163,8 @@ action_push_spaceship(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits),
 	).
 	
 
-change_player(pos(Turn, Ender_fleet, Bugs_fleet, Shots, Hits), 
-              pos(Turn1, Ender_fleet, Bugs_fleet, Shots, Hits)):-         
+change_player(pos(Turn, Ender_fleet, Bugs_fleet, Shots), 
+              pos(Turn1, Ender_fleet, Bugs_fleet, Shots)):-         
     ( Turn = ender,
 	  Turn1 = bugs
 	);
@@ -243,15 +253,15 @@ update_hps(Shots, [Ship|Ships_res], Ships1):-
 
 
 /* test:
-Pos2 = pos(bugs, [ender, 0, [[1, [1, 1]]]], [bugs, 2, [[1, [1, 6]]]], [], _4072), post_turn_actoin(Pos2,Pos3).
+Pos2 = board_size(N), pos(bugs, [ender, 0, [[1, [1, 1]]]], [bugs, 2, [[1, [1, N]]]], []), post_turn_actoin(Pos2,Pos3).
 */
 % post_turn_actoin(+Pos,-Pos1)
-post_turn_actoin(pos(Turn, Ender_fleet, Bugs_fleet, Shots, GUI), 
-                 pos(Turn, Ender_fleet1, Bugs_fleet1, Shots2, GUI)):-
+post_turn_actoin(pos(Turn, Ender_fleet, Bugs_fleet, Shots), 
+                 pos(Turn, Ender_fleet1, Bugs_fleet1, Shots2) ):-
 	calculate_shots_flight(Shots,Shots1),
 	
 	% gui object need to be before the update_hps, to have also destroyed spaceships.
-	% build_gui_objects(pos(Turn1, Ender_fleet, Bugs_fleet, Shots1, GUI1)),
+	% build_gui_objects(pos(Turn1, Ender_fleet, Bugs_fleet, Shots1), GUI),
 	
 	Ender_fleet = [ender, Action_points_ender, Ender_ships],
 	update_hps(Shots1, Ender_ships, Ender_ships1),
@@ -276,7 +286,7 @@ move_use_2_action_point(Pos,Pos2):-
 
 % an action point can be use to fire a shot or to push a spaceship.
 /* test:
-* HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,6]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[],_),move_use_1_action_point(Pos,Pos1).
+* HP=1, E_ship = [HP,[3,1]], board_size(N), B_ship=[HP,[1,N]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[]),move_use_1_action_point(Pos,Pos1).
 */
 move_use_1_action_point(Pos,Pos1):-
 	action_shot(Pos,Pos1);
@@ -290,7 +300,7 @@ move(Pos,_):-
 % General movet hat can be done.
 % at each turn, the player can use 1-3 action point.
 /* test:
-HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,6]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[],_),move(Pos,Pos1).
+HP=1, E_ship = [HP,[3,1]],board_size(N),B_ship=[HP,[1,N]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[]),move(Pos,Pos1).
 */
 % move(+Pos,-Pos3)
 move(Pos,Pos3):-
@@ -300,7 +310,53 @@ move(Pos,Pos3):-
 	% move_use_3_action_point(Pos,Pos1)
 	),
 	change_player(Pos1,Pos2),
-	post_turn_actoin(Pos2,Pos3).
+	post_turn_actoin(Pos2,Pos3),
+	nl, nl, printmatrix(Pos3).
+
+% print the board:
+
+:-use_module(library(clpfd)).
+
+printedge(X, Y, Symbol) :-
+    ( 
+	 (nonvar(Symbol),!, write(Symbol));
+	 write("0")
+	), write(" ").
+
+/*
+printedge(X, Y, Symbol) :-    graph(X,Y), write(Symbol), write(" ").
+printedge(X,Y) :- \+ graph(X,Y), write("0 ").
+*/
+
+
+printmatrix(pos(Turn, Ender_fleet, Bugs_fleet, Shots)) :-
+    board_size(N),
+	Y in 1..N,
+	indomain(Y), 
+	nl,
+    X in 1..N,
+	indomain(X),
+	
+	Ender_fleet = [ender, Action_points_ender, Ender_ships],
+	Bugs_fleet = [bugs, Action_points_bugs, Bugs_ships],
+	
+	% 'e' for ender ship, 'b' for bugs ship, 's' for shot, empty square '0'.
+	% bug: double object on the same square make double prints.
+	(
+	 (member([ _, [X,Y] ], Ender_ships), Symbol = 'e');
+	 (member([ _, [X,Y] ], Bugs_ships), Symbol = 'b');
+	 (member([ Direction,[X,Y] ], Shots), Symbol = 's');
+	 
+	 % not efficeant! this is a patch, it should use cut but it didnt worked.
+	 (   
+	   not( member([ _, [X,Y] ], Ender_ships) ),
+	   not( member([ _, [X,Y] ], Bugs_ships) ),
+	   not( member([ Direction,[X,Y] ], Shots) )
+	 )
+	),
+	
+	printedge(X,Y,Symbol),
+    fail.
 
 
 % moves(+Pos, -PosList)
