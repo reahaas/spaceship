@@ -6,8 +6,13 @@
 % battle spaceship
 
 
+
+%%%
+
+
 % constants:
 
+% shots can move straghit or diadonal, in this steps: -2:1, -1:2, 0:3, 1:2, 2:1
 shot_x_directions([-2,-1,0,1,2]).
 
 
@@ -59,9 +64,9 @@ game_over(pos(Turn, Ender_fleet, Bugs_fleet, Shots)):-
 	),
 	Ships = [].
 
-% get_shot_initial_location(+Player, +Ship, -Loaction)
+% get_shot_initial_location(+Ship, -Loaction)
 % return the initial location of the shot.
-get_shot_initial_location(Player, Ship, Ship_loaction):-
+get_shot_initial_location(Ship, Ship_loaction):-
     Ship = [_, Ship_loaction].
 	
 	
@@ -86,7 +91,7 @@ get_shot_direction(Player, [X,Y]):-
 ship_fire_shot(Player, Ship, Shot):-
     % Ship = [HP, Column],
 	get_shot_direction(Player, Direction),
-	get_shot_initial_location(Player, Ship, Loaction),
+	get_shot_initial_location(Ship, Loaction),
 	Shot = [Direction, Loaction].
 
 reduce_one_action_point(Action_points, Action_points1):-
@@ -118,10 +123,10 @@ action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
 	Shots1 = [Shot|Shots].
 	%%% note: maybe need to sort the shots to avoid duplication positions.
 	
-in_the_board(X1):-
-    X1 >= 1,
+in_the_board(X):-
+    X >= 1,
 	board_size(N),
-	X1 =< N.
+	X =< N.
 	
 push_spaceship(Fleet, Fleet1):-
     % decode fleet.
@@ -193,6 +198,8 @@ calculate_shots_flight([Shot|Shots_res],[Shot1|Shots_res1]):-
 
 
 % remove all the shots that exceded the borders of the board.
+% this action is done after all the calculation of hits and shots movments,
+% that the reason to have a week inequality.
 % clean_out_of_board_shots(+Shots, -Shots1).
 clean_out_of_board_shots([],[]).
 clean_out_of_board_shots([Shot|Shots_res], Shots_res):-
@@ -215,7 +222,7 @@ clean_colusion_shots(Shots1, Shots2):-
 clean_shots([],[]).
 clean_shots(Shots, Shots1):-
     clean_out_of_board_shots(Shots, Shots1).
-	% clean_colusion_shots(Shots1, Shots2).
+	% clean_colusion_shots(Shots1, Shots2). % not supported yet.
 	
     
 
@@ -311,7 +318,13 @@ move(Pos,Pos3):-
 	),
 	change_player(Pos1,Pos2),
 	post_turn_actoin(Pos2,Pos3),
-	nl, nl, printmatrix(Pos3).
+	
+	% print the board:
+	nl, nl, printmatrix(Pos3),
+	
+	staticval(Pos3, Val),
+	nl, nl, write('The value of the next Pos is:'),
+	write(Val).
 
 % print the board:
 
@@ -330,7 +343,8 @@ printedge(X,Y) :- \+ graph(X,Y), write("0 ").
 
 
 printmatrix(pos(Turn, Ender_fleet, Bugs_fleet, Shots)) :-
-    board_size(N),
+    (
+	board_size(N),
 	Y in 1..N,
 	indomain(Y), 
 	nl,
@@ -356,10 +370,15 @@ printmatrix(pos(Turn, Ender_fleet, Bugs_fleet, Shots)) :-
 	),
 	
 	printedge(X,Y,Symbol),
-    fail.
+    fail 
+	);
+	true.
 
 
 % moves(+Pos, -PosList)
+/* test
+notrace,HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,12]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[]),moves(Pos,Pos_list).
+*/
 moves(Pos, PosList):-
     ( game_over(Pos), fail;
 	  bagof(Pos1,move(Pos,Pos1),PosList)
@@ -371,11 +390,28 @@ moves(Pos, PosList):-
 
 
 % need to fix the number of arguments.
-max_to_move([ender,_,_,_,_]).
+max_to_move(pos(ender, Ender_fleet, Bugs_fleet, Shots)).
 
-min_to_move([bugs,_,_,_,_]).
+min_to_move(pos(bugs, Ender_fleet, Bugs_fleet, Shots)).
 
 %% add staticval
+
+staticval(Pos, Val):-
+    Pos = pos(Turn, Ender_fleet, Bugs_fleet, Shots),
+	Bugs_fleet = [], Val = 1000, !.
+
+staticval(Pos, Val):-
+    Pos = pos(Turn, Ender_fleet, Bugs_fleet, Shots),
+	Ender_fleet = [], Val = -1000, !.
+	
+staticval(Pos, Val):-
+    Pos = pos(Turn, Ender_fleet, Bugs_fleet, Shots),
+	Ender_fleet = [ender, Ender_action_points, Ender_ships],
+	Bugs_fleet = [bugs, Bugs_action_points, Bugs_ships],
+	length(Ender_ships, Ender_N_ships),
+	length(Bugs_ships, Bugs_N_ships),
+	Val is ( 10 * ( Ender_N_ships - Bugs_N_ships ) ).
+
 
 %% add alphabeta
 
