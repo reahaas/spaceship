@@ -5,6 +5,7 @@ prolog = Prolog()
 
 # load the file:
 prolog.consult("spaceship.pl")
+prolog.consult("board_printer.pl")
 
 prolog.assertz("father(michael,john)")
 prolog.assertz("father(michael,gina)")

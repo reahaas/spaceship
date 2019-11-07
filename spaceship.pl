@@ -21,6 +21,8 @@ shot_x_directions([-2,-1,0,1,2]).
 new impleamentation:
 */
 
+:-use_module(board_printer).
+
 % Todo: put this in the initialization of the game.
 board_size(12).  %:-
     % integer(N).
@@ -326,53 +328,6 @@ move(Pos,Pos3):-
 	nl, nl, write('The value of the next Pos is:'),
 	write(Val).
 
-% print the board:
-
-:-use_module(library(clpfd)).
-
-printedge(X, Y, Symbol) :-
-    ( 
-	 (nonvar(Symbol),!, write(Symbol));
-	 write("0")
-	), write(" ").
-
-/*
-printedge(X, Y, Symbol) :-    graph(X,Y), write(Symbol), write(" ").
-printedge(X,Y) :- \+ graph(X,Y), write("0 ").
-*/
-
-
-printmatrix(pos(Turn, Ender_fleet, Bugs_fleet, Shots)) :-
-    (
-	board_size(N),
-	Y in 1..N,
-	indomain(Y), 
-	nl,
-    X in 1..N,
-	indomain(X),
-	
-	Ender_fleet = [ender, Action_points_ender, Ender_ships],
-	Bugs_fleet = [bugs, Action_points_bugs, Bugs_ships],
-	
-	% 'e' for ender ship, 'b' for bugs ship, 's' for shot, empty square '0'.
-	% bug: double object on the same square make double prints.
-	(
-	 (member([ _, [X,Y] ], Ender_ships), Symbol = 'e');
-	 (member([ _, [X,Y] ], Bugs_ships), Symbol = 'b');
-	 (member([ Direction,[X,Y] ], Shots), Symbol = 's');
-	 
-	 % not efficeant! this is a patch, it should use cut but it didnt worked.
-	 (   
-	   not( member([ _, [X,Y] ], Ender_ships) ),
-	   not( member([ _, [X,Y] ], Bugs_ships) ),
-	   not( member([ Direction,[X,Y] ], Shots) )
-	 )
-	),
-	
-	printedge(X,Y,Symbol),
-    fail 
-	);
-	true.
 
 
 % moves(+Pos, -PosList)
