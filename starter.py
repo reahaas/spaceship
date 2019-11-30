@@ -1,29 +1,20 @@
 from __future__ import print_function
-from pyswip import Prolog
+from pprint import pprint
+import time
+import format_prolog_output_to_python
 
-prolog = Prolog()
+from prolog_consult_files import create_prolog_and_consult_files
 
-# load the file:
-prolog.consult("spaceship.pl")
-prolog.consult("board_printer.pl")
+from Tests.test_move import test_move
+from Tests.test_push_ship import test_push_ship
 
-prolog.assertz("father(michael,john)")
-prolog.assertz("father(michael,gina)")
+prolog = create_prolog_and_consult_files()
 
-list(prolog.query("father(michael,X)")) == [{'X': 'john'}, {'X': 'gina'}]
 
-for soln in prolog.query("father(X,Y)"):
-    print (soln["X"], "is the father of", soln["Y"])
 
-i = 1
-for board in prolog.query("HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,12]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[]),move(Pos,Pos_list)."):
-    print("index {i} is {board}".format(i=i, board=board))
-    i += 1
 
-test_return = prolog.query("HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,12]],Pos=pos(ender,[ender,2,[E_ship]], [bugs,2,[B_ship]],[]), move_use_1_action_point(Pos,Pos_list).")
 
-for board in test_return:
-    print("results are: {board}".format(board=board))
+test_push_ship_object = test_push_ship(prolog)
+print("push test:\n {0}".format(test_push_ship_object))
 
-# michael is the father of john
-# michael is the father of gina
+test_move(prolog)
