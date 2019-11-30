@@ -12,7 +12,7 @@
 
 % constants:
 
-% shots can move straghit or diadonal, in this steps: -2:1, -1:2, 0:3, 1:2, 2:1
+% shots can move straghit or diagonal, in this steps: -2:1, -1:2, 0:3, 1:2, 2:1
 shot_x_directions([-2,-1,0,1,2]).
 
 
@@ -36,7 +36,9 @@ pos(Turn, Ender_fleet, Bugs_fleet, Shots):-  %%%  , Gui_objects):-
 	% Fleets look like this:
 	Ender_fleet = [ender, Ender_action_points, Ender_ships],
 	Bugs_fleet = [bugs, Bugs_action_points, Bugs_ships].
-	
+
+    % Action_points is a non negative integer.
+
 	% each X_ships is an array of ship object, which is a list of two arguments:
     % ship = [HP, [X,Y]].	
 
@@ -76,7 +78,7 @@ get_shot_initial_location(Ship, Ship_loaction):-
 % direction can be one of: [X,Y] : -2 =< X =< 2, Y in {1,-1}.
 % this predicat only generate the direction.
 % the direction move is explained and calculate in the predicat:
-% calculate_shot_filght(+Shot,-Shot1)
+% calculate_shot_flight(+Shot,-Shot1)
 get_shot_direction(Player, [X,Y]):-
 	(
 	 ( Player = ender,
@@ -124,12 +126,13 @@ action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
 	),
 	Shots1 = [Shot|Shots].
 	%%% note: maybe need to sort the shots to avoid duplication positions.
-	
+
 in_the_board(X):-
     X >= 1,
 	board_size(N),
 	X =< N.
-	
+
+% push_spaceship(+Fleet, -Fleet1)
 push_spaceship(Fleet, Fleet1):-
     % decode fleet.
 	Fleet = [Player, Action_points, Ships],  
@@ -179,11 +182,11 @@ change_player(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
 	  Turn1 = ender
 	).
 	
-% calculate_shot_filght(+Shot,-Shot1)
+% calculate_shot_flight(+Shot,-Shot1)
 % find the new locations for the shot, by it's direction, and current location.
 % ender shots go up, while the bugs shots go down.
 
-calculate_shot_filght([[Xd,Yd],[Xl,Yl]],Shot1):-
+calculate_shots_flight([[Xd,Yd],[Xl,Yl]],Shot1):-
     Xl1 is Xl + Xd,
 	abs(Xd,Abs_Xd),
 	Yl1 is Yl + (Yd * (3 - Abs_Xd)),
@@ -195,7 +198,7 @@ calculate_shot_filght([[Xd,Yd],[Xl,Yl]],Shot1):-
 calculate_shots_flight([],[]).
 
 calculate_shots_flight([Shot|Shots_res],[Shot1|Shots_res1]):-
-	calculate_shot_filght(Shot,Shot1),
+	calculate_shots_flight(Shot,Shot1),
 	calculate_shots_flight(Shots_res,Shots_res1).
 
 
@@ -314,8 +317,8 @@ HP=1, E_ship = [HP,[3,1]],board_size(N),B_ship=[HP,[1,N]],Pos=pos(ender,[ender,2
 % move(+Pos,-Pos3)
 move(Pos,Pos3):-
     (
-	move_use_1_action_point(Pos,Pos1);
-	move_use_2_action_point(Pos,Pos1)  %;
+	move_use_1_action_point(Pos,Pos1)
+	% move_use_2_action_point(Pos,Pos1)  %;
 	% move_use_3_action_point(Pos,Pos1)
 	),
 	change_player(Pos1,Pos2),
