@@ -18,17 +18,8 @@ def test_move(prolog):
 
     print(test_move_return_list)
     for case in test_move_return_list:
-        ender_ships = test_move_return_list[0]["E_ships1"]
-        bugs_ships = test_move_return_list[0]["B_ships1"]
-        shots = test_move_return_list[0]["Shots1"]
-        print("ender_ships: {0}".format(ender_ships))
-        print("bugs_ships: {0}".format(bugs_ships))
-        print("shots: {0}".format(shots))
+        board = format_prolog_output_to_python.convert_prolog_board_to_python_board(case)
 
+        print("board after icon put: {0}".format(board))
+        pprint(board)
 
-    # for item in ender_ships:
-    #     print(item)
-
-    board = format_prolog_output_to_python.print_board(ender_ships, bugs_ships, shots)
-    print("board after icon put: {0}".format(board))
-    pprint(board)

@@ -21,33 +21,13 @@ shot_x_directions([-2,-1,0,1,2]).
 new impleamentation:
 */
 
+:-use_module(pos_definition).
+:-use_module(action_push).
 :-use_module(board_printer).
+:-use_module(reduce_action_point).
 
 % Todo: put this in the initialization of the game.
-board_size(12).  %:-
-    % integer(N).
-	
-% game representation:
-pos(Turn, Ender_fleet, Bugs_fleet, Shots):-  %%%  , Gui_objects):-
-	
-	% Turn is the name of the player. 
-	% it can be one of: {ender, bugs}.
-	
-	% Fleets look like this:
-	Ender_fleet = [ender, Ender_action_points, Ender_ships],
-	Bugs_fleet = [bugs, Bugs_action_points, Bugs_ships].
 
-    % Action_points is a non negative integer.
-
-	% each X_ships is an array of ship object, which is a list of two arguments:
-    % ship = [HP, [X,Y]].	
-
-    % Shots is an array of Shot objects:
-	% Shot = [Direction, Location] , 
-	% Direction = [Xd,Yd], Location = [Xl,Yl].
-
-    % Gui_objects is the full board representation.
-	% it's calculate by the lists: Ender_fleet, Bugs_fleet, Shots.
 
 /*	
 initialize_game(Game):-
@@ -98,9 +78,7 @@ ship_fire_shot(Player, Ship, Shot):-
 	get_shot_initial_location(Ship, Loaction),
 	Shot = [Direction, Loaction].
 
-reduce_one_action_point(Action_points, Action_points1):-
-    Action_points > 0,  % make sure there that the player has an action point.
-	Action_points1 is Action_points - 1.
+
 
 create_shot(Fleet, Fleet1, Shot):-
     Fleet = [Player, Action_points, Ships],  % decode fleet
@@ -127,50 +105,9 @@ action_shot(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
 	Shots1 = [Shot|Shots].
 	%%% note: maybe need to sort the shots to avoid duplication positions.
 
-in_the_board(X):-
-    X >= 1,
-	board_size(N),
-	X =< N.
-
-% push_spaceship(+Fleet, -Fleet1)
-push_spaceship(Fleet, Fleet1):-
-    % decode fleet.
-	Fleet = [Player, Action_points, Ships],  
-	
-	% update action points.
-	reduce_one_action_point(Action_points, Action_points1), 
-	
-	% choose a single ship to move.
-	select(Ship, Ships, Ships_temp),
-	
-	% update the location.
-	Ship = [HP, [X,Y]],
-	( X1 is X + 1;
-	  X1 is X - 1
-	),
-	in_the_board(X1),
-	Ship1 = [HP, [X1,Y]],
-	
-	% add the pushed ship back to the Ships list.
-    select(Ship1, Ships1, Ships_temp),	
-	
-	Fleet1 = [Player, Action_points1, Ships1].
 	
 
-% action_push_spaceship(+Pos,-Pos1)
-% push one of the player ships one square.
-action_push_spaceship(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
-                      pos(Turn, Ender_fleet1, Bugs_fleet1, Shots)):-
-    (
-	 ( Turn = ender,
-	   push_spaceship(Ender_fleet, Ender_fleet1),
-       Bugs_fleet1 = Bugs_fleet
-     );
-	 ( Turn = bugs,
-	   push_spaceship(Bugs_fleet, Bugs_fleet1),
-	   Ender_fleet1 = Ender_fleet
-	 )
-	).
+
 	
 
 change_player(pos(Turn, Ender_fleet, Bugs_fleet, Shots), 

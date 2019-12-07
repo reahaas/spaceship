@@ -1,4 +1,5 @@
 
+import  format_prolog_output_to_python
 
 def test_push_ship(prolog):
     generator_results = prolog.query("Player = ender,"
@@ -9,4 +10,5 @@ def test_push_ship(prolog):
     generator_results_list = list(generator_results)
     for item in generator_results_list:
         print("in function test_push_ship: {0}".format(item))
+
     return generator_results
