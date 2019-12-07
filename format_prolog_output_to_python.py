@@ -53,7 +53,7 @@ def get_icon(x, y, ender_ships, bugs_ships, shots):
     return EMPTY_ICON
 
 
-def print_board(ender_ships, bugs_ships, shots):
+def to_string_board_from_ships_and_shots_lists(ender_ships, bugs_ships, shots):
     board = [[0 for x in range(BOARD_SIZE)] for y in range(BOARD_SIZE)]
     # [][]  # [BOARD_SIZE][BOARD_SIZE]
 
@@ -66,3 +66,19 @@ def print_board(ender_ships, bugs_ships, shots):
 
     return board
 
+def convert_prolog_board_to_python_board(prolog_board):
+    """
+    prolog_board must conatain the fields: E_ships1, B_ships1, Shots1
+    :param prolog_board:
+    :return:
+    """
+    ender_ships = prolog_board["E_ships1"]
+    bugs_ships = prolog_board["B_ships1"]
+    shots = prolog_board["Shots1"] # test_move_return_list[0]["Shots1"]
+    print("ender_ships: {0}".format(ender_ships))
+    print("bugs_ships: {0}".format(bugs_ships))
+    print("shots: {0}".format(shots))
+
+    python_board = to_string_board_from_ships_and_shots_lists(ender_ships, bugs_ships, shots)
+
+    return python_board

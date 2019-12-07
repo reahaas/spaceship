@@ -11,9 +11,6 @@ from Tests.test_push_ship import test_push_ship
 prolog = create_prolog_and_consult_files()
 
 
-
-
-
 test_push_ship_object = test_push_ship(prolog)
 print("push test:\n {0}".format(test_push_ship_object))
 
