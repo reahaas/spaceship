@@ -6,6 +6,7 @@
 % battle spaceship
 
 
+module(spaceship, [moves/2]).
 
 %%%
 
@@ -25,6 +26,7 @@ new impleamentation:
 :-use_module(action_push).
 :-use_module(board_printer).
 :-use_module(reduce_action_point).
+:-use_module(alpha_beta).
 
 % Todo: put this in the initialization of the game.
 
@@ -202,10 +204,10 @@ update_hps(Shots, [Ship|Ships_res], Ships1):-
 
 
 /* test:
-Pos2 = board_size(N), pos(bugs, [ender, 0, [[1, [1, 1]]]], [bugs, 2, [[1, [1, N]]]], []), post_turn_actoin(Pos2,Pos3).
+Pos2 = board_size(N), pos(bugs, [ender, 0, [[1, [1, 1]]]], [bugs, 2, [[1, [1, N]]]], []), post_turn_action(Pos2,Pos3).
 */
-% post_turn_actoin(+Pos,-Pos1)
-post_turn_actoin(pos(Turn, Ender_fleet, Bugs_fleet, Shots), 
+% post_turn_action(+Pos,-Pos1)
+post_turn_action(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
                  pos(Turn, Ender_fleet1, Bugs_fleet1, Shots2) ):-
 	calculate_shots_flight(Shots,Shots1),
 	
@@ -259,11 +261,11 @@ move(Pos,Pos3):-
 	% move_use_3_action_point(Pos,Pos1)
 	),
 	change_player(Pos1,Pos2),
-	post_turn_actoin(Pos2,Pos3),
-	
+	post_turn_action(Pos2,Pos3),
+
 	% print the board:
 	nl, nl, printmatrix(Pos3),
-	
+
 	staticval(Pos3, Val),
 	nl, nl, write('The value of the next Pos is:'),
 	write(Val).
@@ -278,36 +280,5 @@ moves(Pos, PosList):-
     ( game_over(Pos), fail;
 	  bagof(Pos1,move(Pos,Pos1),PosList)
 	).
-
-
-
-%%%% Alpha Beta part:
-
-
-% need to fix the number of arguments.
-max_to_move(pos(ender, Ender_fleet, Bugs_fleet, Shots)).
-
-min_to_move(pos(bugs, Ender_fleet, Bugs_fleet, Shots)).
-
-%% add staticval
-
-staticval(Pos, Val):-
-    Pos = pos(Turn, Ender_fleet, Bugs_fleet, Shots),
-	Bugs_fleet = [], Val = 1000, !.
-
-staticval(Pos, Val):-
-    Pos = pos(Turn, Ender_fleet, Bugs_fleet, Shots),
-	Ender_fleet = [], Val = -1000, !.
-	
-staticval(Pos, Val):-
-    Pos = pos(Turn, Ender_fleet, Bugs_fleet, Shots),
-	Ender_fleet = [ender, Ender_action_points, Ender_ships],
-	Bugs_fleet = [bugs, Bugs_action_points, Bugs_ships],
-	length(Ender_ships, Ender_N_ships),
-	length(Bugs_ships, Bugs_N_ships),
-	Val is ( 10 * ( Ender_N_ships - Bugs_N_ships ) ).
-
-
-%% add alphabeta
 
 

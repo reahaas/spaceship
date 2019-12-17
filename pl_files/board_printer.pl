@@ -1,9 +1,9 @@
 % print the board:
 
+:-module(board_printer, [printmatrix/1]).
 
 :-use_module(library(clpfd)).
 
-:-module(board_printer, [printmatrix/1]).
 
 printedge(X, Y, Symbol) :-
     (
