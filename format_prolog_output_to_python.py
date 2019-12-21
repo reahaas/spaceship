@@ -74,7 +74,7 @@ def convert_prolog_board_to_python_board(prolog_board):
     """
     ender_ships = prolog_board["E_ships1"]
     bugs_ships = prolog_board["B_ships1"]
-    shots = prolog_board["Shots1"] # test_move_return_list[0]["Shots1"]
+    shots = prolog_board["Shots1"]  # test_move_return_list[0]["Shots1"]
     print("ender_ships: {0}".format(ender_ships))
     print("bugs_ships: {0}".format(bugs_ships))
     print("shots: {0}".format(shots))
