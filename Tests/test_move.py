@@ -26,6 +26,9 @@ def test_move_use_1_action_point(prolog):
         pprint(board)
 
 
+    print("Moves count is: {i}".format(i=len(test_move_return_list)))
+
+
 def test_move(prolog):
     test_move_return = prolog.query(
         "HP=1, E_ship = [HP,[3,1]], B_ship=[HP,[1,12]],"
@@ -53,3 +56,5 @@ def test_move(prolog):
 
         print("board after icon put: {0}".format(board))
         pprint(board)
+
+    print("Moves count is: {i}".format(i=len(test_move_return_list)))

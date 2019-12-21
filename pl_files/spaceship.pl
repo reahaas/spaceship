@@ -124,8 +124,7 @@ change_player(pos(Turn, Ender_fleet, Bugs_fleet, Shots),
 % calculate_shot_flight(+Shot,-Shot1)
 % find the new locations for the shot, by it's direction, and current location.
 % ender shots go up, while the bugs shots go down.
-
-calculate_shots_flight([[Xd,Yd],[Xl,Yl]],Shot1):-
+calculate_shot_flight([[Xd,Yd],[Xl,Yl]],Shot1):-
     Xl1 is Xl + Xd,
 	abs(Xd,Abs_Xd),
 	Yl1 is Yl + (Yd * (3 - Abs_Xd)),
@@ -137,7 +136,7 @@ calculate_shots_flight([[Xd,Yd],[Xl,Yl]],Shot1):-
 calculate_shots_flight([],[]).
 
 calculate_shots_flight([Shot|Shots_res],[Shot1|Shots_res1]):-
-	calculate_shots_flight(Shot,Shot1),
+	calculate_shot_flight(Shot,Shot1),
 	calculate_shots_flight(Shots_res,Shots_res1).
 
 
@@ -145,7 +144,9 @@ calculate_shots_flight([Shot|Shots_res],[Shot1|Shots_res1]):-
 % this action is done after all the calculation of hits and shots movments,
 % that the reason to have a week inequality.
 % clean_out_of_board_shots(+Shots, -Shots1).
-clean_out_of_board_shots([],[]).
+clean_out_of_board_shots([],[]):-
+    !.
+
 clean_out_of_board_shots([Shot|Shots_res], Shots_res):-
 	Shot = [Direction, [X,Y]],
 	board_size(N),
@@ -163,7 +164,8 @@ clean_colusion_shots(Shots1, Shots2):-
 
 
 % clean_shots(+Shots, -Shots1).
-clean_shots([],[]).
+clean_shots([],[]):-
+    !.
 clean_shots(Shots, Shots1):-
     clean_out_of_board_shots(Shots, Shots1).
 	% clean_colusion_shots(Shots1, Shots2). % not supported yet.
@@ -278,7 +280,7 @@ notrace,HP=1, E_ship = [HP,[3,1]],B_ship=[HP,[1,12]],Pos=pos(ender,[ender,2,[E_s
 */
 moves(Pos, PosList):-
     ( game_over(Pos), fail;
-	  bagof(Pos1,move(Pos,Pos1),PosList)
+	  setof(Pos1,move(Pos,Pos1),PosList)
 	).
 
 
