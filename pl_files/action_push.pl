@@ -1,10 +1,10 @@
 
 
+:-module(action_push, [push_spaceship/2, action_push_spaceship/2, in_the_board/1]).
 
 :-use_module(pos_definition).
-:-use_module(reduce_action_point)
+:-use_module(reduce_action_point).
 
-:-module(action_push, [push_spaceship/2, action_push_spaceship/2, in_the_board/1]).
 
 % **** action push ****
 
