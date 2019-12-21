@@ -80,6 +80,16 @@ def print_board(board):
     for frame in frame_list:
         frame.pack(side=TOP)
 
+
+    dashboard = Frame(display)
+    e_hp = 1
+    b_hp = 1
+    current_turn = "bugs"
+    ender_hp_lable = Label(dashboard, text="ender hp: {0}".format(e_hp)).pack()
+    bugs_hp_lable = Label(dashboard, text="bugs hp: {0}".format(b_hp)).pack()
+    turn_lable = Label(dashboard, text="turn: {0}".format(current_turn)).pack()
+    dashboard.pack(side=BOTTOM)
+
     display.mainloop()
 
 
