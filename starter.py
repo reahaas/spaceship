@@ -3,6 +3,8 @@ from pprint import pprint
 import time
 import format_prolog_output_to_python
 
+from gui_tkinter import print_board
+
 from prolog_consult_files import create_prolog_and_consult_files
 
 from Tests.test_move import test_move_use_1_action_point, test_move
@@ -28,6 +30,6 @@ if False:
 # test_moves(prolog)
 
 
-test_alpha_beta(prolog)
-
+good_pos = test_alpha_beta(prolog)
+print_board(good_pos)
 
